@@ -15,7 +15,8 @@
 ///   [20-21]=payload1,2 [22-29]=encrypted(crypto,cmd,pad,parity)
 ///
 /// Quick Reference - Commands:
-///   CHECK=0x00  STOP=0x10  UP=0x20  TILT=0x24  DOWN=0x40  INT=0x44
+///   CHECK=0x00  STOP=0x10  TILT_UP=0x20  UP=0x21  VENTILATION=0x24
+///   TILT_DOWN=0x40  DOWN_NO_TILT=0x41  DOWN=0x44
 
 #pragma once
 
@@ -91,10 +92,12 @@ constexpr uint8_t ADDR_3BYTE_THRESHOLD = 0x60;  ///< Types > this use 3-byte add
 namespace command {
 constexpr uint8_t CHECK = 0x00;               ///< Request status (no movement)
 constexpr uint8_t STOP = 0x10;                ///< Stop movement
-constexpr uint8_t UP = 0x20;                  ///< Move up / open
-constexpr uint8_t TILT = 0x24;                ///< Tilt position
-constexpr uint8_t DOWN = 0x40;                ///< Move down / close
-constexpr uint8_t INTERMEDIATE = 0x44;        ///< Move to intermediate position
+constexpr uint8_t TILT_UP = 0x20;             ///< Tilt step open (short up)
+constexpr uint8_t UP = 0x21;                  ///< Move up / open (full travel)
+constexpr uint8_t VENTILATION = 0x24;         ///< Restore saved tilt/ventilation position
+constexpr uint8_t TILT_DOWN = 0x40;           ///< Tilt step closed (short down)
+constexpr uint8_t DOWN_NO_TILT = 0x41;        ///< Move down fully, no tilt restore
+constexpr uint8_t DOWN = 0x44;                ///< Move down / close (full travel + tilt)
 constexpr uint8_t INVALID = 0xFF;             ///< Invalid/unknown command marker
 }  // namespace command
 

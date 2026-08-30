@@ -332,11 +332,12 @@ void MqttAdapter::subscribe_cover_commands_(const Device &dev) {
         });
 
     ctx_.subscribe(DeviceType::COVER, addr, mqtt_topic::TILT,
-        [this, addr](const char *, const char *) {
+        [this, addr](const char *, const char *payload) {
             Device *d = registry_->find(addr, DeviceType::COVER);
             if (d == nullptr) return;
 
-            registry_->command_cover_tilt(*d);
+            // HA sends a tilt position 0-100; >=50 opens the slats, <50 closes them
+            registry_->command_cover_tilt(*d, atoi(payload) >= 50);
         });
 
     ESP_LOGD(TAG, "Subscribed to cover commands for 0x%06x", addr);

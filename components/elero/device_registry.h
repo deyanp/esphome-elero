@@ -88,7 +88,7 @@ class DeviceRegistry {
     void set_cover_position(Device &dev, float target, CommandSource src = CommandSource::HUB);
 
     /// Dispatch a tilt command to a cover device.
-    void command_cover_tilt(Device &dev, CommandSource src = CommandSource::HUB);
+    void command_cover_tilt(Device &dev, bool open, CommandSource src = CommandSource::HUB);
 
     /// Dispatch a command byte to a light device (on/off + FSM + enqueue).
     void command_light(Device &dev, uint8_t cmd_byte, CommandSource src = CommandSource::HUB);
