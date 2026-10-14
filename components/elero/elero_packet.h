@@ -32,6 +32,7 @@ namespace esphome::elero::packet {
 constexpr uint8_t MAX_PACKET_SIZE = 57;       ///< Maximum supported packet body length
 constexpr uint8_t FIFO_LENGTH = 64;           ///< CC1101 FIFO size
 constexpr uint8_t MIN_PACKET_SIZE = 4;        ///< Minimum valid packet length
+constexpr uint8_t ELERO_MAX_ADDRESS_DESTS = (MAX_PACKET_SIZE - 26) / 3;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // RSSI CALCULATION
@@ -224,6 +225,7 @@ struct ParseResult {
   uint32_t bwd_addr{0};   ///< Backward address
   uint32_t fwd_addr{0};   ///< Forward address
   uint32_t dst_addr{0};   ///< First destination address
+  uint32_t dst_addrs[ELERO_MAX_ADDRESS_DESTS]{};  ///< Full 24-bit destination list
 
   // Destination info
   uint8_t num_dests{0};   ///< Number of destinations

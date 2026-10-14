@@ -65,6 +65,8 @@ channels:
         $ref: "#/components/messages/groupUpsertedEvent"
       groupRemovedEvent:
         $ref: "#/components/messages/groupRemovedEvent"
+      groupStateEvent:
+        $ref: "#/components/messages/groupStateEvent"
       stateChangedEvent:
         $ref: "#/components/messages/stateChangedEvent"
       errorEvent:
@@ -109,6 +111,14 @@ channels:
         $ref: "#/components/messages/learnInCancelMessage"
 
 operations:
+  receiveGroupState:
+    action: receive
+    channel:
+      $ref: "#/channels/eleroWs"
+    summary: Receive member-derived group state changes
+    messages:
+      - $ref: "#/channels/eleroWs/messages/groupStateEvent"
+
   receiveConfig:
     action: receive
     channel:
@@ -383,6 +393,12 @@ operations:
 
 components:
   messages:
+    groupStateEvent:
+      name: group_state_changed
+      title: Group state changed
+      payload:
+        $ref: "#/components/schemas/GroupStateEnvelope"
+
     configEvent:
       name: config
       title: Configuration Event
@@ -600,6 +616,39 @@ components:
         $ref: "#/components/schemas/LearnInCancelPayload"
 
   schemas:
+    GroupStateEnvelope:
+      type: object
+      required: [event, data]
+      properties:
+        event:
+          type: string
+          const: group_state_changed
+        data:
+          $ref: "#/components/schemas/GroupStateData"
+
+    GroupStateData:
+      type: object
+      additionalProperties: false
+      required: [id, available, device_type, supports_position, position, operation, is_on]
+      properties:
+        id:
+          type: string
+        available:
+          type: boolean
+        device_type:
+          $ref: "#/components/schemas/DeviceType"
+        supports_position:
+          type: boolean
+        position:
+          type: number
+          minimum: 0
+          maximum: 1
+        operation:
+          type: string
+          enum: [idle, opening, closing]
+        is_on:
+          type: boolean
+
     # ── Server → Client Envelopes ──
 
     ConfigEventEnvelope:
@@ -867,6 +916,26 @@ components:
           type: integer
           description: Timestamp (millis()) of last RF packet from this blind
           examples: [408]
+        command_up:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x20.
+        command_down:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x40.
+        command_stop:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x10.
+        command_check:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x00.
+        command_tilt:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x24.
 
     LightConfig:
       type: object
@@ -948,6 +1017,8 @@ components:
         type; the backend derives and validates the common member type from the
         referenced device ids. Device ids are stable 3-byte device addresses.
       properties:
+        state:
+          $ref: "#/components/schemas/GroupStateData"
         id:
           type: string
           minLength: 1
@@ -962,7 +1033,7 @@ components:
           examples: ["Living Room"]
         device_ids:
           type: array
-          minItems: 2
+          minItems: 1
           maxItems: 48
           uniqueItems: true
           description: Stable device address ids. All must resolve to existing covers or all to existing lights.
@@ -998,6 +1069,12 @@ components:
           type: string
           description: Destination address (hex string). Blind for commands, remote for status.
           examples: ["0xb42f01"]
+        destinations:
+          type: array
+          description: All 24-bit destinations for addressed packets. Empty for selector envelopes.
+          maxItems: 10
+          items:
+            type: string
         channel:
           type: integer
           description: RF channel
@@ -1125,6 +1202,26 @@ components:
           type: integer
           description: Timestamp (millis()) when the device was last persisted to NVS. Non-zero means the device is server-confirmed.
           examples: [1234567]
+        command_up:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x20.
+        command_down:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x40.
+        command_stop:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x10.
+        command_check:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x00.
+        command_tilt:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x24.
 
     CrudEventData:
       type: object
@@ -1416,6 +1513,26 @@ components:
           type: boolean
           description: Whether the cover supports tilt (cover only, default false)
           default: false
+        command_up:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x20.
+        command_down:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x40.
+        command_stop:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x10.
+        command_check:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x00.
+        command_tilt:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x24.
 
     RemoveDevicePayload:
       type: object
@@ -1459,7 +1576,7 @@ components:
           description: Display name.
         device_ids:
           type: array
-          minItems: 2
+          minItems: 1
           maxItems: 48
           uniqueItems: true
           items:
@@ -1699,6 +1816,26 @@ components:
           type: string
           description: Secondary type byte (hex string, default "0x00").
           examples: ["0x00"]
+        command_up:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x20.
+        command_down:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x40.
+        command_stop:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x10.
+        command_check:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x00.
+        command_tilt:
+          type: string
+          pattern: "^0x[0-9a-fA-F]{1,2}$"
+          description: Per-cover RF command byte; defaults to 0x24.
 
     ImportConfigPayload:
       type: object

@@ -1,3 +1,4 @@
+#include <cinttypes>
 #include "sx1262_driver.h"
 #include "cc1101_compat.h"
 #include "esphome/core/log.h"
@@ -167,7 +168,7 @@ bool Sx1262Driver::init() {
     return false;
   }
 
-  ESP_LOGI(TAG, "SX1262 initialized, FSK mode, freq_reg=0x%08x",
+  ESP_LOGI(TAG, "SX1262 initialized, FSK mode, freq_reg=0x%08" PRIx32,
            this->freq_reg_from_cc1101_regs_());
 
   // Verify sync word register wasn't corrupted by calibration/init
@@ -552,13 +553,13 @@ SemtechTxPhaseResult Sx1262Driver::tx_wait_done_for_fsm() {
     }
 
     uint32_t elapsed = millis() - this->phase_started_ms_;
-    ESP_LOGD(TAG, "TX done irq=0x%04x %ums", irq_status, elapsed);
+    ESP_LOGD(TAG, "TX done irq=0x%04x %" PRIu32 "ms", irq_status, elapsed);
     return SemtechTxPhaseResult::Succeeded;
   }
 
   uint32_t elapsed = millis() - this->phase_started_ms_;
   if (elapsed > TX_TIMEOUT_MS) {
-    ESP_LOGE(TAG, "TX timeout after %ums (irq=0x%04x)", TX_TIMEOUT_MS, irq_status);
+    ESP_LOGE(TAG, "TX timeout after %" PRIu32 "ms (irq=0x%04x)", TX_TIMEOUT_MS, irq_status);
     return SemtechTxPhaseResult::Failed;
   }
 
@@ -621,12 +622,12 @@ SemtechTxPhaseResult Sx1262Driver::tx_wait_rx_ready_for_fsm() {
   }
 
   if (elapsed <= RX_READY_TIMEOUT_MS) {
-    ESP_LOGD(TAG, "WaitRxReady: waiting for RX mode=0x%02x after %ums", chip_mode,
+    ESP_LOGD(TAG, "WaitRxReady: waiting for RX mode=0x%02x after %" PRIu32 "ms", chip_mode,
              elapsed);
     return SemtechTxPhaseResult::Pending;
   }
 
-  ESP_LOGW(TAG, "WaitRxReady: RX restore timeout mode=0x%02x after %ums", chip_mode,
+  ESP_LOGW(TAG, "WaitRxReady: RX restore timeout mode=0x%02x after %" PRIu32 "ms", chip_mode,
            elapsed);
   return SemtechTxPhaseResult::Failed;
 }
@@ -664,7 +665,7 @@ bool Sx1262Driver::wait_busy_() {
   uint32_t start = millis();
   while (this->busy_pin_->digital_read()) {
     if (millis() - start > sx1262::BUSY_TIMEOUT_MS) {
-      ESP_LOGE(TAG, "BUSY pin timeout (%ums) — chip unresponsive", sx1262::BUSY_TIMEOUT_MS);
+      ESP_LOGE(TAG, "BUSY pin timeout (%" PRIu32 "ms) — chip unresponsive", sx1262::BUSY_TIMEOUT_MS);
       return false;
     }
     delay_microseconds_safe(10);

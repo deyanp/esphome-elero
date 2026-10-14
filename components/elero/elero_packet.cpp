@@ -99,6 +99,10 @@ ParseResult parse_packet(const uint8_t* raw, size_t raw_len) {
 
   // Calculate destination length from the explicit packet envelope shape.
   if (uses_three_byte_address_envelope(r.type)) {
+    if (r.num_dests > ELERO_MAX_ADDRESS_DESTS) {
+      r.reject_reason = "dests_len_too_long";
+      return r;
+    }
     r.dests_len = r.num_dests * ADDR_SIZE;
     if (raw_len >= pkt_offset::FIRST_DEST + ADDR_SIZE) {
       r.dst_addr = extract_addr(&raw[pkt_offset::FIRST_DEST]);
@@ -139,6 +143,12 @@ ParseResult parse_packet(const uint8_t* raw, size_t raw_len) {
   }
 
   // Extract RSSI and LQI (appended by CC1101 after packet data)
+  if (uses_three_byte_address_envelope(r.type)) {
+    for (uint8_t i = 0; i < r.num_dests; ++i) {
+      r.dst_addrs[i] = extract_addr(&raw[pkt_offset::FIRST_DEST + i * ADDR_SIZE]);
+    }
+  }
+
   r.rssi_raw = raw[r.length + 1];  // +1 because length byte is at [0]
   r.rssi = calc_rssi(r.rssi_raw);
   r.lqi = raw[r.length + CC1101_APPEND_SIZE] & cc1101_status::LQI_MASK;

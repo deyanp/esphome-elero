@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cinttypes>
 #include "elero_packet.h"
 #include "time_provider.h"
 #include "tx_client.h"
@@ -89,7 +90,7 @@ class LearnInManager : public TxClient {
     if (hub->request_tx(this, command_)) {
       tx_pending_ = true;
       ESP_LOGD("elero.learn_in",
-               "TX queued state=%s cmd=0x%02x packet %u/%u src=0x%06x ch=%u",
+               "TX queued state=%s cmd=0x%02x packet %u/%u src=0x%06" PRIx32 " ch=%u",
                learn_in_state_str(state_), queued_step_, sent_packets_ + 1,
                packets_per_step_, command_.src_addr, command_.channel);
     }

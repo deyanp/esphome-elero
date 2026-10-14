@@ -1,3 +1,4 @@
+#include <cinttypes>
 #include "learn_in_manager.h"
 
 namespace esphome::elero {
@@ -198,7 +199,7 @@ bool LearnInManager::queue_step_(uint8_t cmd_byte, LearnInState pending_state) {
     command_.hop = packet::button::HOP;
   }
   state_ = pending_state;
-  ESP_LOGI(TAG, "Learn-in queued state=%s cmd=0x%02x src=0x%06x ch=%u",
+  ESP_LOGI(TAG, "Learn-in queued state=%s cmd=0x%02x src=0x%06" PRIx32 " ch=%u",
            learn_in_state_str(state_), cmd_byte, command_.src_addr, command_.channel);
   return true;
 }

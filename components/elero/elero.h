@@ -44,6 +44,8 @@ struct RfPacketInfo {
   int64_t decoded_at_us{0};  ///< esp_timer_get_time() when decode completed (us, for latency tracking)
   uint32_t src;           ///< Source address (remote for commands, blind for status)
   uint32_t dst;           ///< Destination address (blind for commands, remote for status)
+  uint8_t num_address_dests{0};
+  uint32_t dst_addrs[packet::ELERO_MAX_ADDRESS_DESTS]{};
   uint8_t channel;
   uint8_t type;           ///< Message type byte (0x6a=command, 0xca=status, etc.)
   uint8_t type2;          ///< Secondary type byte

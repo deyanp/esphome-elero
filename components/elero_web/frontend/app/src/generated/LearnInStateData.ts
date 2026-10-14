@@ -26,4 +26,4 @@ interface LearnInStateData {
    */
   'channel'?: number;
 }
-export { LearnInStateData };
+export type { LearnInStateData };

@@ -1,3 +1,4 @@
+#include <cinttypes>
 #include "cc1101_driver.h"
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
@@ -455,7 +456,7 @@ CC1101Driver::TxDoneCheckResult CC1101Driver::tx_check_done_result_() {
 
   uint32_t elapsed = millis() - this->tx_state_enter_time_;
   if (elapsed > TX_DONE_TIMEOUT_MS) {
-    ESP_LOGE(TAG, "TX timeout in WaitTxDone after %ums", elapsed);
+    ESP_LOGE(TAG, "TX timeout in WaitTxDone after %" PRIu32 "ms", elapsed);
     return TxDoneCheckResult::FailedTimeout;
   }
   return TxDoneCheckResult::Pending;
@@ -473,11 +474,11 @@ Cc1101TxPhaseResult CC1101Driver::tx_return_to_rx_for_fsm() {
 
   if (marcstate != CC1101_MARCSTATE_RX) {
     if (marcstate_is_transient(marcstate) && elapsed <= RX_READY_TIMEOUT_MS) {
-      ESP_LOGD(TAG, "ReturnToRx: waiting for RX MARCSTATE=0x%02x after %ums", marcstate,
+      ESP_LOGD(TAG, "ReturnToRx: waiting for RX MARCSTATE=0x%02x after %" PRIu32 "ms", marcstate,
                elapsed);
       return Cc1101TxPhaseResult::Pending;
     }
-    ESP_LOGW(TAG, "ReturnToRx: radio not RX-ready, MARCSTATE=0x%02x after %ums", marcstate,
+    ESP_LOGW(TAG, "ReturnToRx: radio not RX-ready, MARCSTATE=0x%02x after %" PRIu32 "ms", marcstate,
              elapsed);
     return Cc1101TxPhaseResult::Failed;
   }
@@ -497,11 +498,11 @@ Cc1101TxPhaseResult CC1101Driver::tx_return_to_rx_for_fsm() {
   marcstate = this->read_status(CC1101_MARCSTATE) & packet::cc1101_status::MARCSTATE_MASK;
   if (marcstate != CC1101_MARCSTATE_RX) {
     if (marcstate_is_transient(marcstate) && elapsed <= RX_READY_TIMEOUT_MS) {
-      ESP_LOGD(TAG, "ReturnToRx: waiting for RX restore MARCSTATE=0x%02x after %ums",
+      ESP_LOGD(TAG, "ReturnToRx: waiting for RX restore MARCSTATE=0x%02x after %" PRIu32 "ms",
                marcstate, elapsed);
       return Cc1101TxPhaseResult::Pending;
     }
-    ESP_LOGW(TAG, "ReturnToRx: RX restore failed, MARCSTATE=0x%02x after %ums", marcstate,
+    ESP_LOGW(TAG, "ReturnToRx: RX restore failed, MARCSTATE=0x%02x after %" PRIu32 "ms", marcstate,
              elapsed);
     return Cc1101TxPhaseResult::Failed;
   }

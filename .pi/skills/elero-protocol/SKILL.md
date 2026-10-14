@@ -492,6 +492,16 @@ spi_write_reg(0x08, 0x45);  // PKTCTRL0
 
 ## Protocol Ambiguities
 
+### Group/list `0x45` evidence
+
+`msg_decode()` zeroes its first two bytes by XORing the recovered key with
+itself. Never treat decoded `00 00` as evidence of another cipher. Historical
+group DOWN sidecars decode to command byte `0x10`; recorded all-channel primary
+and following emissions decode to `0x40` and `0x10`. The sidecar byte does not
+establish a user STOP action. Relay eligibility, commit/release semantics, and
+all-channel TX behavior still require hardware experiments. See
+`docs/research/elero-open-protocol-issues.md` for raw evidence and the branch audit.
+
 ### type2 Field (Offset 3)
 
 The secondary type byte varies by envelope/context:

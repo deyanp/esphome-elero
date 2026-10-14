@@ -1,3 +1,4 @@
+#include <cinttypes>
 #include "elero.h"
 #include "elero_protocol.h"
 #include "elero_packet.h"
@@ -151,7 +152,7 @@ void Elero::dump_config() {
     this->driver_->dump_config();
   }
   if (this->registry_) {
-    ESP_LOGCONFIG(TAG, "  Registered devices: %d", this->registry_->count_active());
+    ESP_LOGCONFIG(TAG, "  Registered devices: %zu", this->registry_->count_active());
   }
 }
 
@@ -311,7 +312,7 @@ bool Elero::request_tx(TxClient *client, const EleroCommand &cmd) {
     return false;
   }
 #ifdef USE_ESP32
-  ESP_LOGV(TAG_RF, "TX dst=0x%06x src=0x%06x cmd=0x%02x type=0x%02x cnt=%u",
+  ESP_LOGV(TAG_RF, "TX dst=0x%06" PRIx32 " src=0x%06" PRIx32 " cmd=0x%02x type=0x%02x cnt=%u",
            cmd.dst_addr, cmd.src_addr, cmd.payload[4], cmd.type, cmd.counter);
 
   // Post to RF task queue (non-blocking, no SPI)
@@ -350,6 +351,10 @@ optional<RfPacketInfo> Elero::decode_packet(const uint8_t *buf, size_t buf_len) 
   pkt.timestamp_ms = millis();
   pkt.src = r.src_addr;
   pkt.dst = r.dst_addr;
+  if (uses_three_byte_address_envelope(r.type)) {
+    pkt.num_address_dests = r.num_dests;
+    memcpy(pkt.dst_addrs, r.dst_addrs, sizeof(pkt.dst_addrs));
+  }
   pkt.channel = r.channel;
   pkt.type = r.type;
   pkt.type2 = r.type2;
@@ -380,7 +385,7 @@ void Elero::dispatch_packet(const RfPacketInfo &pkt) {
   const int64_t dispatch_start_us = esp_timer_get_time();
 #endif
 
-  ESP_LOGV(TAG_RF, "RX src=0x%06x dst=0x%06x type=0x%02x cmd=0x%02x state=0x%02x cnt=%u",
+  ESP_LOGV(TAG_RF, "RX src=0x%06" PRIx32 " dst=0x%06" PRIx32 " type=0x%02x cmd=0x%02x state=0x%02x cnt=%u",
            pkt.src, pkt.dst, pkt.type, pkt.command, pkt.state, pkt.cnt);
 
   // Dispatch through unified device registry (state machines, adapters, observers)

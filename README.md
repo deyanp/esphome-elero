@@ -5,6 +5,16 @@ ESPHome component for controlling Elero wireless blinds and lights via an ESP32 
 [![ESPHome](https://img.shields.io/badge/ESPHome-Component-blue)](https://esphome.io/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
+Requires **ESPHome 2026.9.0 or newer**. Local development uses Python 3.12;
+install the pinned tools with `mise install`, then dependencies with `mise exec -- uv sync`.
+Native API devices continue to come from NVS; existing device backups and configuration
+remain supported. See [ESPHome compatibility](docs/ESPHOME-COMPATIBILITY.md) for migration details.
+
+The web UI is bundled with the component. GitHub installations do not require
+Node.js, pnpm, or a separate frontend download. Frontend contributors must rebuild
+and commit `components/elero_web/elero_web_ui.h` alongside source changes;
+CI verifies that the generated header matches the source.
+
 ## Quick Start
 
 ### 1. Choose your hardware
@@ -66,6 +76,13 @@ If you're upgrading from a version where devices were defined under `cover: - pl
 
 Group transmissions support up to **31 destination channels per source address**
 on CC1101, SX1262, and SX1276. See [radio framing and limits](docs/RADIO_FRAMING.md#supported-group-size).
+
+Cover groups expose member-derived state and position through MQTT and the native
+API. Motors with different command variants can coexist: each cover supports
+`command_up`, `command_down`, `command_stop`, `command_check`, and `command_tilt`
+overrides. For example, Raffstore motors may need `command_up: "0x21"` and
+`command_down: "0x44"`. Existing NVS devices and backups retain their defaults.
+See the [per-device fields](docs/CONFIGURATION.md#per-device-fields-managed-in-the-ui).
 
 ## Documentation
 

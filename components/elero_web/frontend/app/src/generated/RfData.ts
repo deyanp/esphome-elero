@@ -16,6 +16,10 @@ interface RfData {
    */
   'dst': string;
   /**
+   * All 24-bit destinations for addressed packets. Empty for selector envelopes.
+   */
+  'destinations'?: string[];
+  /**
    * RF channel
    * @example 5
    */
@@ -93,4 +97,4 @@ interface RfData {
    */
   'raw': string;
 }
-export { RfData };
+export type { RfData };
